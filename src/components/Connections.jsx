@@ -95,7 +95,7 @@ const Connections = () => {
                 <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-slate-900 rounded-full"></div>
               </div>
 
-              {/* Info */}
+             
               <div className="flex-grow text-center sm:text-left">
                 <h2 className="text-xl font-bold text-white group-hover:text-indigo-400 transition-colors">
                   {firstName} {lastName}
@@ -104,7 +104,7 @@ const Connections = () => {
                   "{about || "Ready to build something amazing."}"
                 </p>
                 
-                {/* Modern Skill Tags */}
+                
                 {skills && skills.length > 0 && (
                   <div className="flex flex-wrap justify-center sm:justify-start gap-2 mt-3">
                     {skills.slice(0, 4).map(skill => (
@@ -116,7 +116,7 @@ const Connections = () => {
                 )}
               </div>
 
-              {/* Action */}
+              
               <div className="w-full sm:w-auto mt-4 sm:mt-0">
                 <Link to={"/chat/" + _id} className="block">
                   <button className="w-full sm:w-auto bg-slate-800 hover:bg-indigo-600 text-white font-bold px-8 py-3 rounded-xl transition-all border border-slate-700 hover:border-indigo-500 shadow-xl active:scale-95">

@@ -27,7 +27,7 @@ const Feed = () => {
     getFeed();
   }, []);
 
-  // Professional Loading State (Skeleton)
+  
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] bg-[#0f172a]">
@@ -41,7 +41,7 @@ const Feed = () => {
     );
   }
 
-  // Elegant Empty State
+  
   if (!feed || feed.length <= 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[80vh] bg-[#0f172a] px-6 text-center">
@@ -65,20 +65,20 @@ const Feed = () => {
   return (
     <div className="relative min-h-[90vh] bg-[#0f172a] overflow-hidden flex flex-col items-center justify-center px-4 py-10">
       
-      {/* Background Decorative Blobs for "Tech" Feel */}
+      
       <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="z-10 w-full max-w-md lg:max-w-lg">
-        {/* Subtle Progress Text */}
+        
         <div className="mb-4 flex justify-between items-end px-2">
             <h3 className="text-slate-400 text-sm font-medium uppercase tracking-widest">Discovery</h3>
             <span className="text-indigo-400 text-xs font-bold">{feed.length} devs nearby</span>
         </div>
 
-        {/* The Main Card Container */}
+       
         <div className="relative group transition-all duration-500 ease-out">
-            {/* Aesthetic "Stack" Effect - Bottom Layer */}
+            
             <div className="absolute top-4 left-0 w-full h-full bg-slate-800/40 rounded-3xl -z-10 scale-[0.96] border border-slate-700/50"></div>
             
             <div className="transition transform active:scale-95 duration-200 cursor-grab active:cursor-grabbing">
@@ -86,7 +86,7 @@ const Feed = () => {
             </div>
         </div>
 
-        {/* Interaction Hint */}
+       
         <p className="text-slate-500 text-center text-xs mt-8 animate-pulse tracking-wide">
           click buttons to connect
         </p>

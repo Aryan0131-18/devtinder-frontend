@@ -10,7 +10,7 @@ const Requests = () => {
 
   const reviewRequest = async (status, _id) => {
     try {
-      // FIX: Added await to ensure the DB updates before the UI changes
+      
       await axios.post(
         BASE_URL + "/request/review/" + status + "/" + _id,
         {},

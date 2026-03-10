@@ -13,7 +13,7 @@ const EditProfile = ({ user }) => {
   const [gender, setGender] = useState(user.gender || "");
   const [about, setAbout] = useState(user.about || "");
   const [error, setError] = useState("");
-  const [showSuccess, setShowSuccess] = useState(false); // New Success State
+  const [showSuccess, setShowSuccess] = useState(false);
   
   const dispatch = useDispatch();
 
@@ -128,7 +128,7 @@ const EditProfile = ({ user }) => {
     Live Preview
   </p>
   
-  {/* Pass showButtons={false} to hide Pass/Connect on your own profile */}
+  {/* Pass showButtons={false} to hide Pass/Connect on  profile */}
   <UserCard 
     user={{ firstName, lastName, photoUrl, age, gender, about }} 
     showButtons={false} 

@@ -126,7 +126,7 @@ const Login = () => {
             onClick={() => {
                 setIsLoginForm((v) => !v);
                 setError("");
-                setShowPassword(false); // Reset visibility on toggle
+                setShowPassword(false); 
             }}
           >
             {isLoginForm ? (

@@ -11,8 +11,8 @@ const Chat = () => {
     const [newMessage, setNewMessage] = useState("");
     const user = useSelector(store => store.user);
     const userId = user?._id;
-    const scrollRef = useRef(null); // For auto-scrolling
-    const socketRef = useRef(null); // To persist the socket instance
+    const scrollRef = useRef(null);
+    const socketRef = useRef(null); 
 
     const fetchChatMessages = async () => {
         try {
