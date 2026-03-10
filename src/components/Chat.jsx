@@ -1,103 +1,122 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import React, { useEffect, useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { createSocketConnection } from '../utils/socket';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
 import { BASE_URL } from '../utils/constants';
 
-
 const Chat = () => {
-    const {targetUserId}=useParams();
-    const[messages,setMessages]=useState([]);
-    const [newMessage,setNewMessage]=useState("");
-    const user=useSelector(store=>store.user);
-    const userId=user?._id;
+    const { targetUserId } = useParams();
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState("");
+    const user = useSelector(store => store.user);
+    const userId = user?._id;
+    const scrollRef = useRef(null); // For auto-scrolling
+    const socketRef = useRef(null); // To persist the socket instance
 
-
-    const fetchChatMessages=async()=>{
-      const chat=await axios.get(BASE_URL+"/chat/"+targetUserId,{
-        withCredentials:true,
-      });
-
-      console.log(chat.data.messages);
-
-      const chatMessages=chat?.data?.messages.map(msg=>{
-        const {senderId,text}= msg;
-        return {firstName:senderId?.firstName, 
-          lastName:senderId?.lastName, 
-          text,
-        };
-      });
-      setMessages(chatMessages);
-    }
-
-    useEffect(()=>{
-      fetchChatMessages();
-    },[])
-
-    useEffect(()=>{
-
-      if(!userId)
-      {
-        return;
-      }
-      const socket=createSocketConnection();
-      // As soon as the page loaded, the socket connection is made and joinChat event is emitted.
-      socket.emit("joinChat",{userId,targetUserId});
-
-      socket.on("messageReceived",({firstName,lastName,text})=>{
-        console.log(firstName+" : "+text);
-        setMessages((messages)=>[...messages,{firstName,lastName,text}]);
-      })
-
-      return ()=>{
-        socket.disconnect();
-      }
-    },[userId,targetUserId]);
-
-    const sendMessage=()=>{
-      const socket=createSocketConnection();
-      socket.emit("sendMessage",
-        {firstName:user.firstName,
-          lastName:user.lastName,
-          userId,
-          targetUserId,
-          text: newMessage,
-        });
+    const fetchChatMessages = async () => {
+        try {
+            const res = await axios.get(BASE_URL + "/chat/" + targetUserId, {
+                withCredentials: true,
+            });
+            const chatMessages = res?.data?.messages.map(msg => ({
+                firstName: msg.senderId?.firstName,
+                lastName: msg.senderId?.lastName,
+                text: msg.text,
+            }));
+            setMessages(chatMessages);
+        } catch (err) {
+            console.error("Error fetching messages", err);
+        }
     };
 
+    // Auto-scroll to bottom whenever messages change
+    useEffect(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
 
-  return (
-    <div className="w-3/4 mx-auto border border-gray-600 m-5 h-[70vh] flex flex-col">
-      <h1 className="p-5 border-b border-gray-600">Chat</h1>
-      <div className="flex-1 overflow-scroll p-5">{/* display Message */}
+    useEffect(() => {
+        fetchChatMessages();
+    }, [targetUserId]);
 
-        {messages.map((msg,index)=>{
-            return(
-               <div key={index} className={"chat "+ 
-                (user.firstName===msg.firstName?"chat-end":"chat-start")
-              }
-              >
-                <div className="chat-header">
-                  {`${msg.firstName} ${msg.lastName}`}
-                  <time className="text-xs opacity-50">2 hours ago</time>
-                  </div>
-                  <div className="chat-bubble">{msg.text}</div>
-                  <div className="chat-footer opacity-50">Seen</div>
-                </div>
-            );
-        })}
-      </div>
-      <div className="p-5 border-t border-gray-600 flex items-center gap-2">
-        <input
-         value={newMessage}
-         onChange={(e)=> setNewMessage(e.target.value)}
-        className="flex-1 border border-gray-500 text-black rounded p-2"></input>
-        <button onClick={sendMessage} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition duration-200"
-            >Send</button>
-      </div>
-    </div>
-  )
-}
+    useEffect(() => {
+        if (!userId) return;
 
-export default Chat
+        // Initialize socket once and store in ref
+        const socket = createSocketConnection();
+        socketRef.current = socket;
+
+        socket.emit("joinChat", { userId, targetUserId });
+
+        socket.on("messageReceived", ({ firstName, lastName, text }) => {
+            setMessages((prev) => [...prev, { firstName, lastName, text }]);
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, [userId, targetUserId]);
+
+    const handleSendMessage = () => {
+        if (!newMessage.trim()) return;
+
+        // Use the existing socket connection from the ref
+        socketRef.current.emit("sendMessage", {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            userId,
+            targetUserId,
+            text: newMessage,
+        });
+        
+        setNewMessage(""); // Clear input after sending
+    };
+
+    return (
+        <div className="w-full max-w-4xl mx-auto px-4 py-6 h-[85vh] flex flex-col">
+            <div className="bg-slate-900 border border-slate-800 rounded-t-3xl p-5">
+                <h1 className="text-xl font-bold text-white flex items-center gap-2">
+                    <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+                    Chat
+                </h1>
+            </div>
+
+            {/* Message Area */}
+            <div className="flex-1 overflow-y-auto p-5 bg-slate-900/40 border-x border-slate-800 space-y-4 custom-scrollbar">
+                {messages.map((msg, index) => {
+                    const isMe = user.firstName === msg.firstName;
+                    return (
+                        <div key={index} className={`chat ${isMe ? "chat-end" : "chat-start"}`}>
+                            <div className="chat-header text-slate-500 text-xs mb-1">
+                                {msg.firstName} {msg.lastName}
+                            </div>
+                            <div className={`chat-bubble text-sm font-medium ${isMe ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-200"}`}>
+                                {msg.text}
+                            </div>
+                        </div>
+                    );
+                })}
+                <div ref={scrollRef} /> {/* Hidden div to scroll into view */}
+            </div>
+
+            {/* Input Area */}
+            <div className="p-5 bg-slate-900 border border-slate-800 rounded-b-3xl flex items-center gap-3">
+                <input
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    placeholder="Type a message..."
+                    className="flex-1 bg-slate-800 border-none text-white rounded-xl p-3 focus:ring-2 focus:ring-indigo-500 outline-none placeholder:text-slate-500"
+                />
+                <button 
+                    onClick={handleSendMessage} 
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white p-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 active:scale-95"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default Chat;
